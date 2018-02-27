@@ -7,13 +7,13 @@ import aiomysql
 
 
 
-## sql_select() sql_execute()
+# sql_select() sql_execute()
 
 def log(sql, args=()):
     logging.info('SQL: %s' % sql)
 
 
-##     http://aiomysql.readthedocs.io/en/latest/pool.html
+#     http://aiomysql.readthedocs.io/en/latest/pool.html
 
 async def create_pool(loop, **kw):
     logging.info('create database connection pool...')
@@ -38,7 +38,7 @@ async def select(sql, args, size=None):
     global __pool
     async with __pool.get() as conn:
         async with  conn.cursor(aiomysql.DictCursor) as cur:
-            await cur.execute(sql.replace('?','%s'), args or ())     ## aviod SQL injection
+            await cur.execute(sql.replace('?','%s'), args or ())     # aviod SQL injection
             if size:
                 rs = await cur.fecthmany(size)
             else:
@@ -148,7 +148,7 @@ class ModelMetaclass(type):
         attrs['__select__'] = 'select `%s`, %s from `%s`' % (primaryKey, ', '.join(escaped_fields), tableName)
         attrs['__update__'] = 'update `%s` set %s where `%s` = ?' %(tableName, ', '.join(map(lambda f: '`%s`=?' % (mappings.get(f).name or f), fields)), primaryKey)
         attrs['__delete__'] = 'delete from `%s` where `%s`=?' % (tableName, primaryKey)
-        attrs['__insert__'] = 'insert into `%s` (%s, `%s`) values (%s)' % (tableName, ', ',join(escaped_fields), primaryKey, create_args_string(len(escaped_fields) + 1))
+        attrs['__insert__'] = 'insert into `%s` (%s, `%s`) values (%s)' % (tableName, ', '.join(escaped_fields), primaryKey, create_args_string(len(escaped_fields) + 1))
         return type.__new__(cls, name, bases, attrs)
 
 class Model(dict, metaclass=ModelMetaclass):
@@ -219,7 +219,7 @@ class Model(dict, metaclass=ModelMetaclass):
 
     @classmethod
     async def find(cls, pk):
-        'find obfect by primary key.'
+        'find object by primary key.'
         rs = await  select('%s where `%s`=?' % (cls.__select__,cls.__primary_key__), [pk], 1)
         if len(rs) == 0:
             return None
