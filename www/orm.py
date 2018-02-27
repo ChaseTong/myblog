@@ -42,7 +42,7 @@ async def select(sql, args, size=None):
             if size:
                 rs = await cur.fecthmany(size)
             else:
-                rs = await cur.fetchalll()
+                rs = await cur.fetchall()
         logging.info('rows returned: %s' % len(rs))
         return rs
 
@@ -188,22 +188,22 @@ class Model(dict, metaclass=ModelMetaclass):
         if args is None:
             args = []
         orderBy = kw.get('orderBy', None)
-        if object:
+        if orderBy:
             sql.append('order by')
             sql.append(orderBy)
-            limit = kw.get('limit', None)
-            if limit is not None:
-                sql.append('limit')
-                if isinstance(limit, int):
-                    sql.append('?')
-                    args.append(limit)
-                elif isinstance(limit, tuple) and len(limit) == 2:
-                    sql.append('?,?')
-                    args.extend(limit)
-                else:
-                    raise  ValueError('Invalid limit value: %s' % str(limit))
-            rs = await select(' '.join(sql), args)
-            return [cls(**r) for r in rs]
+        limit = kw.get('limit', None)
+        if limit is not None:
+            sql.append('limit')
+            if isinstance(limit, int):
+                sql.append('?')
+                args.append(limit)
+            elif isinstance(limit, tuple) and len(limit) == 2:
+                sql.append('?,?')
+                args.extend(limit)
+            else:
+                raise  ValueError('Invalid limit value: %s' % str(limit))
+        rs = await select(' '.join(sql), args)
+        return [cls(**r) for r in rs]
 
     @classmethod
     async def findNumber(cls, selectField, where=None, args=None):
