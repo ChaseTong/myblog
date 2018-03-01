@@ -40,7 +40,7 @@ async def select(sql, args, size=None):
         async with  conn.cursor(aiomysql.DictCursor) as cur:
             await cur.execute(sql.replace('?','%s'), args or ())     # aviod SQL injection
             if size:
-                rs = await cur.fecthmany(size)
+                rs = await cur.fetchmany(size)
             else:
                 rs = await cur.fetchall()
         logging.info('rows returned: %s' % len(rs))
@@ -215,7 +215,7 @@ class Model(dict, metaclass=ModelMetaclass):
         rs = await select(' '.join(sql), args, 1)
         if len(rs) == 0:
             return None
-        return rs[0['_num_']]
+        return rs[0]['_num_']
 
     @classmethod
     async def find(cls, pk):
