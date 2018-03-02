@@ -74,13 +74,8 @@ def cookie2user(cookie_str):
         return None
 
 @get('/')
-def index(request):
-    summary = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
-    blogs = [
-        Blog(id='1', name='Test Blog', summary=summary, created_at=time.time()-120),
-        Blog(id='2', name='Something New', summary=summary, created_at=time.time()-3600),
-        Blog(id='3', name='Learn Swift', summary=summary, created_at=time.time()-7200)
-    ]
+async def index(request):
+    blogs = await Blog.findAll()
     return {
         '__template__': 'blogs.html',
         'blogs': blogs,
@@ -155,9 +150,10 @@ def manage_create_blog():
 
 @get('/manage/blogs')
 def manage_blogs(*, page='1'):
+
     return {
         '__template__': 'manage_blogs.html',
-        'page_index': get_page_index(page)
+        'page_index': get_page_index(page),
     }
 
 
@@ -214,3 +210,12 @@ async def api_create_blog(request, *, name, summary, content):
     blog = Blog(user_id=request.__user__.id, user_name=request.__user__.name, user_image=request.__user__.image, name=name.strip(), summary=summary.strip(), content=content.strip())
     await blog.save()
     return blog
+
+@post('/api/blogs/{id}/comments')
+async def api_create_comments(request, *, id, content):
+    uid = next_id()
+    comment = Comment(id=uid, blog_id=id, user_id=request.__user__.id, user_name=request.__user__.name, user_image=request.__user__.image, content=content)
+    await comment.save()
+    return comment
+
+
